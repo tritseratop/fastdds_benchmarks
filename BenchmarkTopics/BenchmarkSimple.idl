@@ -1,0 +1,5 @@
+struct BenchmarkSimple
+{
+	long long time_service;
+	unsigned long index;
+};
