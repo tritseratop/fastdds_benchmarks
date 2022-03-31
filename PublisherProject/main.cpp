@@ -54,9 +54,9 @@ int main(
         conf.ip = ip;
         //conf.whitelist.push_back(std::string(argv[1]));
     }
-
+    uint32_t samples = 50;
     std::vector<PublisherConfig> confs({
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 250},
+        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 250},
         });
     conf.configs = confs;
     //std::cout << "Sending starts with 250ms interval" << std::endl;
@@ -64,33 +64,30 @@ int main(
 
 
     confs = {
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 100},
+        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 100},
     };
     conf.configs = confs;
     sendingDdsData(conf);
 
     confs = {
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 50},
+        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 50},
         };
     conf.configs = confs;
     sendingDdsData(conf);
 
     confs = {
-        {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 25},
+        {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 25},
         };
     conf.configs = confs;
     sendingDdsData(conf);
 
     std::cout << "4th iteration starts" << std::endl;
     confs = {
-        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 25},
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 25},
     };
     conf.configs = confs;
     conf.port = 4045;
     sendingDdsData(conf);
 
-    //sendingDdsData(100, 100);
-    //sendingDdsData(100, 100);
-    //sendingDdsData(100, 100);
     system("pause");
 }

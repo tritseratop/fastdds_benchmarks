@@ -104,11 +104,12 @@ void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& co
 {
 	if (config_ == config)
 	{
-		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
+		std::cout << "This subscriber's configuration has been already run" << std::endl;
 	}
 	else
 	{
 		config_ = config;
+		deletePublishers();
 		initPublishers();
 	}
 }

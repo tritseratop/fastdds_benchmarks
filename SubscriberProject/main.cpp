@@ -16,10 +16,9 @@ void recievingDdsData(const ServiceConfig<SubscriberConfig>& conf)
 
 int main(int argc, char* argv[])
 {
+    uint32_t samples = 50;
     std::vector<SubscriberConfig> configs({
-    {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 100},
-    //        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 100},
-    //        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 100},
+    {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 100},
         });
 
     ServiceConfig<SubscriberConfig> config({
@@ -51,18 +50,14 @@ int main(int argc, char* argv[])
     recievingDdsData(config);
     recievingDdsData(config);
     configs = {
-    {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, 100, 100},
-    //        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 100},
-    //        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 100},
+    {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 100},
         };
     config.configs = configs;
     recievingDdsData(config);
 
     std::cout << "4th iteration starts" << std::endl;
     configs = {
-    {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, 100, 100},
-    //        {1, 10000, "DDSData2", "DDSData", TopicType::DDS_DATA, 100, 100},
-    //        {2, 10000, "DDSData3", "DDSData", TopicType::DDS_DATA, 100, 100},
+    {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
     };
     config.configs = configs;
     config.port = 4045;

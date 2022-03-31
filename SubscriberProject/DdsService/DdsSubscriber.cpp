@@ -33,6 +33,7 @@ SubscriberService::~SubscriberService()
 	{
 		std::cout << "Participant deletion failed" << std::endl;
 	}
+	
 	std::cout << "Sub service deleted" << std::endl;
 }
 

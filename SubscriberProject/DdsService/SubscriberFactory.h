@@ -87,6 +87,7 @@ public:
 				std::cout << "Error: " << res() << std::endl;
 			}
 		}
+		
 		std::cout << "Subscriber is deleted" << std::endl;
 		//support_type_.delete_data(support_type_.get());
 	}
@@ -113,9 +114,17 @@ public:
 			return false;
 		}
 
+		eprosima::fastdds::dds::DataReaderQos rqos;
+		rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		rqos.history().depth = 30;
+		rqos.resource_limits().max_samples = 50;
+		rqos.resource_limits().allocated_samples = 20;
+		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+
 		reader_ = subscriber_->create_datareader(
 			topic_,
-			eprosima::fastdds::dds::DATAREADER_QOS_DEFAULT,
+			rqos,
 			&listener_);
 		if (reader_ == nullptr)
 		{
@@ -132,6 +141,7 @@ public:
 			auto kek = eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->lookup_participants(0);
 			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
+		
 		TransitionInfo info;
 		for (const auto& p : data_)
 		{

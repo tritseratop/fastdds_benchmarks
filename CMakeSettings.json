@@ -29,11 +29,21 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "variables": [
-//        {
-//          "name": "CMAKE_BUILD_TYPE",
-//          "value": "Release",
-//          "type": "STRING"
-//        }
+        {
+          "name": "fastcdr_DIR",
+          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
+        },
+        {
+          "name": "fastrtps_DIR",
+          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
+        },
+        {
+          "name": "foonathan_memory_DIR",
+          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "type": "PATH"
+        }
       ]
     }
   ]

@@ -10,4 +10,3 @@ set(CMAKE_CXX_STANDARD 17)
 # Include sub-projects.
 add_subdirectory ("PublisherProject")
 add_subdirectory ("SubscriberProject")
-include_directories ("C:/Program Files/Fast-DDS/Fast-DDS/src/cpp")

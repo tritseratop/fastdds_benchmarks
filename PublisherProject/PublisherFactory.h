@@ -123,7 +123,16 @@ public:
 		}
 		std::cout << "Publisher is created" << std::endl;
 
-		writer_ = publisher_->create_datawriter(topic_, eprosima::fastdds::dds::DATAWRITER_QOS_DEFAULT, &listener_);
+		eprosima::fastdds::dds::DataWriterQos wqos;
+		wqos.history().kind = KEEP_LAST_HISTORY_QOS;
+		wqos.history().depth = 30;
+		wqos.resource_limits().max_samples = 50;
+		wqos.resource_limits().allocated_samples = 20;
+		wqos.reliable_writer_qos().times.heartbeatPeriod.seconds = 2;
+		wqos.reliable_writer_qos().times.heartbeatPeriod.nanosec = 200 * 1000 * 1000;
+		wqos.reliability().kind = RELIABLE_RELIABILITY_QOS;
+
+		writer_ = publisher_->create_datawriter(topic_, wqos, &listener_);
 		if (writer_ == nullptr)
 		{
 			return false;

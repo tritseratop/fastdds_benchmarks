@@ -48,4 +48,5 @@ target_link_libraries(SubscriberProject
         PUBLIC fastcdr
 )
 
+set(CMAKE_BINARY_DIR \\WIN-H6063DLC8KE\temp)
 # TODO: Add tests and install targets if needed.

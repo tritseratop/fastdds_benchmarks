@@ -52,6 +52,15 @@ void ConcreteSubscriber<BenchmarkSimple, BenchmarkSimplePubSubType>::SubscriberL
 template<>
 void ConcreteSubscriber<DDSData, DDSDataPubSubType>::SubscriberListener::specificDataHandling(DDSData& data)
 {
+	PacketInfo packet_info{
+						data_sample_.time_service(),
+						TimeConverter::GetTime_LLmcs(),
+						packet_info.receiving_time - packet_info.dispatch_time,
+						DDSData::getCdrSerializedSize(data_sample_)
+	};
+	std::cout << "Delivery time: " << packet_info.delivery_time
+		<< " | Transmitted size: " << packet_info.size << std::endl;
+	sub_->data_.push_back(std::make_pair(packet_info, std::move(data_sample_)));
 }
 
 template<>
