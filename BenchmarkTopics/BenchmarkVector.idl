@@ -2,5 +2,5 @@ struct BenchmarkVector
 {
 	long long time_service;
 	unsigned long index;
-	secuence<long> index;
+	sequence<long> data;
 };

@@ -22,6 +22,10 @@ TopicType string2TopicType(std::string type_name)
 	{
 		return TopicType::BENCHMARK_SIMPLE;
 	}
+	else if (type_name == "BenchmarkVector")
+	{
+		return TopicType::BENCHMARK_VECTOR;
+	}
 	else
 	{
 		return TopicType::UNKNOWN;
@@ -42,6 +46,8 @@ std::string TopicType2string(TopicType type)
 		return "DDSAlarmEx";
 	case TopicType::BENCHMARK_SIMPLE:
 		return "BenchmarkSimple";
+	case TopicType::BENCHMARK_VECTOR:
+		return "BenchmarkVector";
 	default:
 		return "";
 	}

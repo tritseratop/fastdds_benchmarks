@@ -31,6 +31,7 @@ public:
 	void setVectorSizesInDataTopic();
 
 	std::deque<DataDto> getDataCacheCopy() const;
+	void deleteSubscribers();
 
 private:
 
@@ -44,9 +45,7 @@ private:
 	std::vector<AbstractDdsSubscriber*> subscribers_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
-	eprosima::fastdds::dds::TypeSupport config_type_; // TODO не нужна как поле ?
-
-	void deleteSubscribers();
+	eprosima::fastdds::dds::TypeSupport config_type_; // TODO не нужна как поле 
 
 };
 

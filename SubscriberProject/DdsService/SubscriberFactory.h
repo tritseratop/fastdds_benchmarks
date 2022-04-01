@@ -13,6 +13,7 @@
 #include "../ThreadSafeQueue/ThreadSafeQueue.h"
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../../BenchmarkTopics/BenchmarkSimplePubSubTypes.h"
+#include "../../BenchmarkTopics/BenchmarkVectorPubSubTypes.h"
 #include "../../include/TimeConverter/TimeConverter.hpp"
 #include "../../include/CommonClasses.h"
 
@@ -121,6 +122,7 @@ public:
 		rqos.resource_limits().allocated_samples = 20;
 		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
 		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+		rqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
 
 		reader_ = subscriber_->create_datareader(
 			topic_,
@@ -136,25 +138,48 @@ public:
 	TransitionInfo run() override
 	{
 		std::cout << "Loop starts with " << config_.sleep << "ms interval" << std::endl;
+		listener_ = SubscriberListener(this);
 		while (!stop_)
 		{
 			auto kek = eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->lookup_participants(0);
-			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
-		
-		TransitionInfo info;
-		for (const auto& p : data_)
+		if (reader_ != nullptr)
 		{
-			info.delivery_time += p.first.delivery_time;
-			info.size += p.first.size;
+			auto res = subscriber_->delete_datareader(reader_);
+			reader_ = nullptr;
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << "Error: " << res() << std::endl;
+			}
 		}
-		std::cout << "Total delivery time: " << info.delivery_time << std::endl;
+		std::cout << "Loop stopped" << std::endl;
+		stop_ = false;
+
+		TransitionInfo info;
+
 		if (!data_.empty())
 		{
+			info.max_delivery_time = data_[0].first.delivery_time;
+			info.min_delivery_time = data_[0].first.delivery_time;
+			for (const auto& p : data_)
+			{
+				info.max_delivery_time = info.max_delivery_time > p.first.delivery_time ? 
+					info.max_delivery_time : p.first.delivery_time;
+
+				info.min_delivery_time = info.min_delivery_time < p.first.delivery_time ?
+					info.min_delivery_time : p.first.delivery_time;
+			
+				info.delivery_time += p.first.delivery_time;
+				info.size += p.first.size;
+			}
+			std::cout << "Total delivery time: " << info.delivery_time << std::endl;
 			std::cout << "Average delivery time: " << info.delivery_time / data_.size() << std::endl;
+			std::cout << "Max delivery time: " << info.max_delivery_time << std::endl;
+			std::cout << "Min delivery time: " << info.min_delivery_time << std::endl;
 		}
+		std::cout << "Number of losted packages: " << config_.samples - data_.size() << std::endl;
 		std::cout << "Total transmitted size: " << info.size << std::endl;
-		std::cout << "Number of losted packeges: " << listener_.losted_count_ << std::endl;
 		return info;
 	}
 
@@ -174,7 +199,7 @@ private:
 
 	T data_sample_;
 	
-	bool stop_;
+	std::atomic<bool> stop_;
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::Subscriber* subscriber_;
@@ -214,11 +239,9 @@ private:
 					samples_++;
 					specificDataHandling(data_sample_);
 					//TODO по другому надо как то проверять
+					if (samples_ >= sub_->config_.samples)
 					{
-						if (samples_ >= sub_->config_.samples)
-						{
-							sub_->stop_ = true;
-						}
+						sub_->stop_ = true;
 					}
 				}
 			}
@@ -231,14 +254,14 @@ private:
 			if (info.current_count_change == 1)
 			{
 				matched_ += info.current_count_change;
-				std::cout << "ConcreteSubscriber matched." << std::endl;
+				std::cout << "Subscriber #" << sub_->subscriber_->get_instance_handle() << " matched." << std::endl;
 			}
 			else if (info.current_count_change == -1)
 			{
 				matched_ += info.current_count_change;
-				std::cout << "ConcreteSubscriber unmatched." << std::endl;
+				std::cout << "Subscriber #" << sub_->subscriber_->get_instance_handle() << " unmatched." << std::endl;
 
-				if (matched_ == 0)
+				if (info.current_count == 0)
 				{
 					this->sub_->stop_ = true;
 				}
@@ -250,8 +273,20 @@ private:
 			}
 		}
 
+		void on_requested_deadline_missed(
+			eprosima::fastdds::dds::DataReader* reader,
+			const eprosima::fastrtps::RequestedDeadlineMissedStatus& status) override
+		{
+			if (status.total_count > 10)
+			{
+				this->sub_->stop_ = true;
+				std::cout << "Missed 10 deadlines" << std::endl;
+			}
+		}
+
 		void specificDataHandling(T& data);
 
+	private:
 		int matched_;
 		uint32_t samples_; // TODO atomic??
 		uint32_t losted_count_; // TODO atomic??

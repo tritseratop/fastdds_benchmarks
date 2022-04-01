@@ -50,6 +50,26 @@ void ConcreteSubscriber<BenchmarkSimple, BenchmarkSimplePubSubType>::SubscriberL
 }
 
 template<>
+void ConcreteSubscriber<BenchmarkVector, BenchmarkVectorPubSubType>::SubscriberListener::specificDataHandling(BenchmarkVector& data)
+{
+	PacketInfo packet_info{
+						data_sample_.time_service(),
+						TimeConverter::GetTime_LLmcs(),
+						packet_info.receiving_time - packet_info.dispatch_time,
+						BenchmarkVector::getCdrSerializedSize(data_sample_)
+	};
+	std::cout << "Sample #" << data.index()
+		<< " | Delivery time: " << packet_info.delivery_time
+		<< " | Transmitted size: " << packet_info.size << std::endl;
+	if (!sub_->data_.empty() && data.index() - sub_->data_.back().second.index() > 1)
+	{
+		++losted_count_;
+		std::cout << "Previous package is losted" << std::endl;
+	}
+	sub_->data_.push_back(std::make_pair(packet_info, std::move(data_sample_)));
+}
+
+template<>
 void ConcreteSubscriber<DDSData, DDSDataPubSubType>::SubscriberListener::specificDataHandling(DDSData& data)
 {
 	PacketInfo packet_info{
@@ -94,6 +114,8 @@ AbstractDdsSubscriber* SubscriberFactory::createSubscriber(
 		return new ConcreteSubscriber<DDSAlarmEx, DDSAlarmExPubSubType>(participant, config);
 	case TopicType::BENCHMARK_SIMPLE:
 		return new ConcreteSubscriber<BenchmarkSimple, BenchmarkSimplePubSubType>(participant, config);
+	case TopicType::BENCHMARK_VECTOR:
+		return new ConcreteSubscriber<BenchmarkVector, BenchmarkVectorPubSubType>(participant, config);
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;

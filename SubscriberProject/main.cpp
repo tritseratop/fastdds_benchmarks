@@ -27,40 +27,59 @@ int main(int argc, char* argv[])
         "127.0.0.1",
         1111,
         {"127.0.0.1", "192.168.0.185", "192.168.0.186"},
-        configs,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000
+        configs
         });
 
     if (argc > 1)
     {
         config.ip = std::string(argv[1]);
-        //config.whitelist.push_back(std::string(argv[1]));
     }
 
-    //recievingDdsData(config);
-    recievingDdsData(config);
-    recievingDdsData(config);
-    configs = {
-    {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 100},
-        };
     config.configs = configs;
-    recievingDdsData(config);
+    SubscriberService* mysub = new SubscriberService(config, nullptr);
 
-    std::cout << "4th iteration starts" << std::endl;
+    mysub->setVectorSizesInDataTopic();
+    std::cout << "\nSERVICE RUN WITH TOPIC " << config.configs[0].topic_type_name << std::endl;
+    if (mysub->initSubscribers())
+    {
+        mysub->runSubscribers();
+    }
+
     configs = {
-    {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
+        {0, 10000, "BenchmarkVector", "BenchmarkVector", TopicType::BENCHMARK_VECTOR, samples, 100},
     };
     config.configs = configs;
-    config.port = 4045;
-    recievingDdsData(config);
+    std::cout << "\nSERVICE RUN WITH TOPIC " << config.configs[0].topic_type_name << std::endl;
+    mysub->changeSubsConfig(config);
+    mysub->runSubscribers();
+
+    config = {
+        "Participant_sub",
+        Transport::TCP,
+        "127.0.0.1",
+        1111,
+        {"127.0.0.1", "192.168.0.185", "192.168.0.186"},
+        configs,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+    };
+
+    configs = {
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 300},
+    };
+    config.configs = configs;
+    std::cout << "\nSERVICE RUN WITH TOPIC " << config.configs[0].topic_type_name << std::endl;
+    mysub->changeSubsConfig(config);
+    mysub->runSubscribers();
+
+    delete mysub;
     system("pause");
 }

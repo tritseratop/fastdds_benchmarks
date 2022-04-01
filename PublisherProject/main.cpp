@@ -2,18 +2,6 @@
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include "../include/TestUtility.h"
 
-DDSData getDdsData()
-{
-    DDSData ddsData;
-    ddsData.time_source(0);
-    ddsData.time_service(0);
-    //std::vector<int> v(10, 1);
-    //DataCollectionInt dataCollectionInt;
-    //dataCollectionInt.value(v);
-    //ddsData.data_int(dataCollectionInt);
-    return ddsData;
-}
-
 void sendingDdsData(const ServiceConfig<PublisherConfig>& conf)
 {
     std::cout << "Sending starts with " << conf.configs.size() << " publisher(s)" << std::endl;
@@ -35,17 +23,7 @@ int main(
         "127.0.0.1",
         1111,
         {"127.0.0.1"},
-        {},
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000,
-        //1000
+        {}
     });
 
     if (argc > 1)
@@ -56,38 +34,55 @@ int main(
     }
     uint32_t samples = 50;
     std::vector<PublisherConfig> confs({
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 250},
+        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 25},
         });
     conf.configs = confs;
-    //std::cout << "Sending starts with 250ms interval" << std::endl;
-    //sendingDdsData(conf);
 
+    PublisherService* mypub = new PublisherService(conf);
+    std::cout << "\nSERVICE RUN WITH TOPIC " << conf.configs[0].topic_name << std::endl;
+    std::cout << "Sending starts with " << conf.configs.size() << " publisher(s)" << std::endl;
+    if (mypub->initPublishers())
+    {
+        mypub->runPublishers();
+    }
 
     confs = {
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 100},
+        {0, 10000, "BenchmarkVector", "BenchmarkVector", TopicType::BENCHMARK_VECTOR, samples, 100},
     };
     conf.configs = confs;
-    sendingDdsData(conf);
+    std::cout << "\nSERVICE RUN WITH TOPIC " << conf.configs[0].topic_name << std::endl;
+    mypub->changeSubsConfigAndInit(conf);
+    mypub->runPublishers();
 
+    conf = {
+        "Participant_pub",
+        Transport::TCP,
+        "127.0.0.1",
+        1111,
+        {"127.0.0.1"},
+        {},
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+    };
     confs = {
-        {0, 10000, "BenchmarkSimple", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 50},
-        };
-    conf.configs = confs;
-    sendingDdsData(conf);
-
-    confs = {
-        {0, 10000, "BenchmarkSimple1", "BenchmarkSimple", TopicType::BENCHMARK_SIMPLE, samples, 25},
-        };
-    conf.configs = confs;
-    sendingDdsData(conf);
-
-    std::cout << "4th iteration starts" << std::endl;
-    confs = {
-        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 25},
+        {0, 10000, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 300},
     };
     conf.configs = confs;
-    conf.port = 4045;
-    sendingDdsData(conf);
+    std::cout << "\nSERVICE RUN WITH TOPIC " << conf.configs[0].topic_name << std::endl;
+    mypub->changeSubsConfigAndInit(conf);
+    auto data = getDdsData(750);
+    mypub->setDdsData(&data);
+    mypub->runPublishers();
+
+    delete mypub;
 
     system("pause");
 }

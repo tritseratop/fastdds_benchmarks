@@ -16,8 +16,6 @@ SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& conf
 	, config_(config)
 	, stop_ws_server_(false)
 {
-	//TODO где вызывать?
-	setVectorSizesInDataTopic();
 }
 
 SubscriberService::~SubscriberService()
@@ -57,12 +55,12 @@ bool SubscriberService::createParticipant()
 	{
 		std::cout << "Participant is creating with transport IP " << config_.ip << " and port " << config_.port << std::endl;
 		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, getParticipantQos());
+		if (participant_ == nullptr)
+		{
+			return false;
+		}
+		std::cout << "Participant created" << std::endl;
 	}
-	if (participant_ == nullptr)
-	{
-		return false;
-	}
-	std::cout << "Participant created" << std::endl;
 	return true;
 }
 
@@ -103,6 +101,7 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 bool SubscriberService::initSubscribers()
 {
+	setVectorSizesInDataTopic();
 	createParticipant();
 	if (!config_.configs.empty())
 	{

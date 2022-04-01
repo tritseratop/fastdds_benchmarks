@@ -18,6 +18,16 @@ void ConcretePublisher<BenchmarkSimple, BenchmarkSimplePubSubType>::specificData
 }
 
 template<>
+void ConcretePublisher<BenchmarkVector, BenchmarkVectorPubSubType>::specificDataChanging()
+{
+	data_.index(samples_count_);
+	if (data_.data().empty())
+	{
+		data_.data().resize(100);
+	}
+}
+
+template<>
 void ConcretePublisher<DDSData, DDSDataPubSubType>::specificDataChanging()
 {
 }
@@ -53,6 +63,8 @@ AbstractDdsPublisher* PublisherFactory::createPublisher(
 		return new ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>(participant, config);
 	case TopicType::BENCHMARK_SIMPLE:
 		return new ConcretePublisher<BenchmarkSimple, BenchmarkSimplePubSubType>(participant, config);
+	case TopicType::BENCHMARK_VECTOR:
+		return new ConcretePublisher<BenchmarkVector, BenchmarkVectorPubSubType>(participant, config);
 	default:
 		std::cout << "Topic type " << config.topic_type_name << " is not found" << std::endl;
 		return nullptr;

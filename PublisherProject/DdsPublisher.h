@@ -12,6 +12,7 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../BenchmarkTopics/BenchmarkSimplePubSubTypes.h"
+#include "../BenchmarkTopics/BenchmarkVectorPubSubTypes.h"
 #include "PublisherFactory.h"
 
 class PublisherService
@@ -23,13 +24,14 @@ public:
 
     bool initPublishers();
     void runPublishers();
-    void changeSubsConfig(const ServiceConfig<PublisherConfig>& config);
+    void changeSubsConfigAndInit(const ServiceConfig<PublisherConfig>& config);
 
-    void setDdsData(DDSData* data, size_t size);
+    void setDdsData(DDSData* data);
     void setDdsDataEx(DDSDataEx* data, size_t size);
     void setBenchmarkSimple(BenchmarkSimple* data, size_t size);
 
     bool createNewPublisher(const PublisherConfig& config);
+    void deletePublishers();
 
 private:
     ServiceConfig<PublisherConfig> config_;
@@ -41,7 +43,6 @@ private:
 
     bool stop;
 
-    void deletePublishers();
     void setVectorSizesInDataTopic();
 };
 

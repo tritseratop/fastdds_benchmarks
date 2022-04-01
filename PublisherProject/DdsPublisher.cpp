@@ -17,6 +17,8 @@ PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
 PublisherService::~PublisherService()
 {
 	deletePublishers();
+	// Без этого иногда на SUB не изменяется SubscriptionMatchedStatus
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	participant_->delete_contained_entities();
 	if (DomainParticipantFactory::get_instance()->delete_participant(participant_) != ReturnCode_t::RETCODE_OK)
 	{
@@ -100,7 +102,7 @@ void PublisherService::runPublishers()
 	}
 }
 
-void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& config)
+void PublisherService::changeSubsConfigAndInit(const ServiceConfig<PublisherConfig>& config)
 {
 	if (config_ == config)
 	{
@@ -114,13 +116,13 @@ void PublisherService::changeSubsConfig(const ServiceConfig<PublisherConfig>& co
 	}
 }
 
-void PublisherService::setDdsData(DDSData* data, size_t size)
+void PublisherService::setDdsData(DDSData* data)
 {
 	for (auto pub : publishers_)
 	{
 		if (pub->getTopicType() == TopicType::DDS_DATA)
 		{
-			pub->setData(static_cast<void*>(data), size);
+			pub->setData(static_cast<void*>(data));
 		}
 	}
 }
@@ -131,7 +133,7 @@ void PublisherService::setDdsDataEx(DDSDataEx* data, size_t size)
 	{
 		if (pub->getTopicType() == TopicType::DDS_DATA_EX)
 		{
-			pub->setData(static_cast<void*>(data), size);
+			pub->setData(static_cast<void*>(data));
 		}
 	}
 }

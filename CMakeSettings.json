@@ -31,17 +31,17 @@
       "variables": [
         {
           "name": "fastcdr_DIR",
-          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
           "type": "PATH"
         },
         {
           "name": "fastrtps_DIR",
-          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
           "type": "PATH"
         },
         {
           "name": "foonathan_memory_DIR",
-          "value": "C:\\Program Files\\!eProsima\\fastrtps 2.5.0\\cmake",
+          "value": "C:\\Program Files\\eProsima\\fastrtps 2.5.0\\cmake",
           "type": "PATH"
         }
       ]

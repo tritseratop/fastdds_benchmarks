@@ -14,6 +14,7 @@
 
 #include "../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
 #include "../BenchmarkTopics/BenchmarkSimplePubSubTypes.h"
+#include "../BenchmarkTopics/BenchmarkVectorPubSubTypes.h"
 #include "../include/TimeConverter/TimeConverter.hpp"
 #include "../include/CommonClasses.h"
 
@@ -40,7 +41,7 @@ public:
 	virtual ~AbstractDdsPublisher() {};
 	virtual bool init() = 0;
 	virtual void run() = 0;
-	virtual void setData(void* data, size_t size) = 0;
+	virtual void setData(void* data) = 0;
 	virtual TopicType getTopicType() = 0;
 	//virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
@@ -97,7 +98,7 @@ public:
 		//type_.delete_data(type_.get());
 	}
 
-	void setData(void* data, size_t size) override
+	void setData(void* data) override
 	{
 		//T* data_p;
 		data_ = *(static_cast<T*>(data));
@@ -131,6 +132,7 @@ public:
 		wqos.reliable_writer_qos().times.heartbeatPeriod.seconds = 2;
 		wqos.reliable_writer_qos().times.heartbeatPeriod.nanosec = 200 * 1000 * 1000;
 		wqos.reliability().kind = RELIABLE_RELIABILITY_QOS;
+		wqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
 
 		writer_ = publisher_->create_datawriter(topic_, wqos, &listener_);
 		if (writer_ == nullptr)
@@ -144,7 +146,7 @@ public:
 	void run() override
 	{
 		std::cout << "Loop starts with " << config_.sleep << "ms interval" << std::endl;
-		while (!stop_ && samples_count_ < config_.samples)
+		while (!stop_ && samples_count_ <= config_.samples)
 		{
 			if (publish(writer_, &listener_))
 			{
@@ -152,6 +154,7 @@ public:
 			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
+		
 	}
 
 	TopicType getTopicType() override
@@ -250,9 +253,5 @@ public:
 protected:
 
 };
-
-TopicType string2TopicType(std::string type_name);
-
-std::string TopicType2string(TopicType type);
 
 #endif //!PUBLISHER_FACTORY_H_

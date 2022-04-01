@@ -218,6 +218,8 @@ public:
 struct TransitionInfo
 {
 	int64_t delivery_time = 0;
+	int64_t max_delivery_time = 0;
+	int64_t min_delivery_time = 0;
 	uint64_t size = 0;
 };
 
