@@ -1,4 +1,5 @@
 #include "PublisherFactory.h"
+#include "../include/TestUtility.h"
 
 using namespace eprosima::fastdds::dds;
 
@@ -20,11 +21,17 @@ void ConcretePublisher<BenchmarkSimple, BenchmarkSimplePubSubType>::specificData
 template<>
 void ConcretePublisher<BenchmarkVector, BenchmarkVectorPubSubType>::specificDataChanging()
 {
-	data_.index(samples_count_);
 	if (data_.data().empty())
 	{
-		data_.data().resize(100);
+		data_.data().resize(10);
 	}
+
+	if (samples_count_ >= config_.samples)
+	{
+		data_.data().resize(data_.data().size() * 10);
+	}
+	data_.index(samples_count_);
+	
 }
 
 template<>
@@ -44,6 +51,38 @@ void ConcretePublisher<DDSAlarm, DDSAlarmPubSubType>::specificDataChanging()
 
 template<>
 void ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>::specificDataChanging()
+{
+}
+
+template<>
+void ConcretePublisher<BenchmarkSimple, BenchmarkSimplePubSubType>::setData()
+{
+}
+
+template<>
+void ConcretePublisher<BenchmarkVector, BenchmarkVectorPubSubType>::setData()
+{
+}
+
+template<>
+void ConcretePublisher<DDSData, DDSDataPubSubType>::setData()
+{
+	data_ = getDdsData(config_.vector_size);
+}
+
+template<>
+void ConcretePublisher<DDSDataEx, DDSDataExPubSubType>::setData()
+{
+	data_ = getDdsDataEx(config_.vector_size);
+}
+
+template<>
+void ConcretePublisher<DDSAlarm, DDSAlarmPubSubType>::setData()
+{
+}
+
+template<>
+void ConcretePublisher<DDSAlarmEx, DDSAlarmExPubSubType>::setData()
 {
 }
 

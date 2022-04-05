@@ -61,6 +61,7 @@ void ConcreteSubscriber<BenchmarkVector, BenchmarkVectorPubSubType>::SubscriberL
 	std::cout << "Sample #" << data.index()
 		<< " | Delivery time: " << packet_info.delivery_time
 		<< " | Transmitted size: " << packet_info.size << std::endl;
+	std::lock_guard<std::mutex> deq_write(std::mutex());
 	if (!sub_->data_.empty() && data.index() - sub_->data_.back().second.index() > 1)
 	{
 		++losted_count_;
@@ -80,12 +81,23 @@ void ConcreteSubscriber<DDSData, DDSDataPubSubType>::SubscriberListener::specifi
 	};
 	std::cout << "Delivery time: " << packet_info.delivery_time
 		<< " | Transmitted size: " << packet_info.size << std::endl;
+	std::lock_guard<std::mutex> deq_write(std::mutex());
 	sub_->data_.push_back(std::make_pair(packet_info, std::move(data_sample_)));
 }
 
 template<>
 void ConcreteSubscriber<DDSDataEx, DDSDataExPubSubType>::SubscriberListener::specificDataHandling(DDSDataEx& data)
 {
+	PacketInfo packet_info{
+						data_sample_.time_service(),
+						TimeConverter::GetTime_LLmcs(),
+						packet_info.receiving_time - packet_info.dispatch_time,
+						DDSDataEx::getCdrSerializedSize(data_sample_)
+	};
+	std::cout << "Delivery time: " << packet_info.delivery_time
+		<< " | Transmitted size: " << packet_info.size << std::endl;
+	std::lock_guard<std::mutex> deq_write(std::mutex());
+	sub_->data_.push_back(std::make_pair(packet_info, std::move(data_sample_)));
 }
 
 template<>

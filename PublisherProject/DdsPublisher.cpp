@@ -1,6 +1,7 @@
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastrtps/transport/UDPv4TransportDescriptor.h>
 
 #include "DdsPublisher.h"
 
@@ -10,6 +11,12 @@ using eprosima::fastrtps::types::ReturnCode_t;
 PublisherService::PublisherService(const ServiceConfig<PublisherConfig>& config)
 	: participant_(nullptr)
 	, config_(config)
+	, stop(false)
+{
+}
+
+PublisherService::PublisherService()
+	: participant_(nullptr)
 	, stop(false)
 {
 }
@@ -29,47 +36,10 @@ PublisherService::~PublisherService()
 bool PublisherService::initPublishers()
 {
 	using namespace eprosima::fastrtps;
-	using namespace eprosima::fastrtps::rtps;
 	//TODO где вызывать?
 	setVectorSizesInDataTopic();
 
-	DomainParticipantQos qos;
-	qos.name(config_.participant_name);
-
-	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(1, 0);
-
-	qos.transport().use_builtin_transports = false;
-
-	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
-
-	/*std::vector<std::string> whitelist(config_.whitelist);
-	for (std::string ip : whitelist)
-	{
-		descriptor->interfaceWhiteList.push_back(ip);
-		std::cout << "Whitelisted " << ip << std::endl;
-	}*/
-
-	descriptor->sendBufferSize = 0;
-	descriptor->receiveBufferSize = 0;
-
-	descriptor->set_WAN_address(config_.ip);
-
-	descriptor->add_listener_port(config_.port);
-
-	qos.transport().user_transports.push_back(descriptor);
-
-	if (participant_ == nullptr)
-	{
-		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, qos);
-	}
-	auto kek = DomainParticipantFactory::get_instance()->lookup_participants(0);
-	auto qos_ = participant_->get_qos();
-	if (participant_ == nullptr)
-	{
-		std::cout << "participant is nullptr" << std::endl;
-		return false;
-	}
+	createParticipant();
 
 	if (!config_.configs.empty())
 	{
@@ -80,7 +50,7 @@ bool PublisherService::initPublishers()
 	}
 	else
 	{
-		std::cout << "Configuration for subscribers is not found" << std::endl;
+		std::cout << "Configuration for publishers is not found" << std::endl;
 		return false;
 	}
 	for (auto& pub : publishers_)
@@ -89,6 +59,71 @@ bool PublisherService::initPublishers()
 	}
 	return true;
 }
+
+eprosima::fastdds::dds::DomainParticipantQos PublisherService::getParticipantQos()
+{
+	using namespace eprosima::fastrtps;
+	using namespace eprosima::fastrtps::rtps;
+	//using namespace eprosima::fastdds::rtps;
+	DomainParticipantQos qos;
+	qos.name(config_.participant_name);
+
+	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(1, 0);
+
+	qos.transport().use_builtin_transports = false;
+
+	if (config_.transport = Transport::TCP)
+	{
+		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
+
+		/*std::vector<std::string> whitelist(config_.whitelist);
+		for (std::string ip : whitelist)
+		{
+			descriptor->interfaceWhiteList.push_back(ip);
+			std::cout << "Whitelisted " << ip << std::endl;
+		}*/
+
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
+
+		descriptor->set_WAN_address(config_.ip);
+
+		descriptor->add_listener_port(config_.port);
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
+	else
+	{
+		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
+		
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
+		descriptor->non_blocking_send = true;
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
+	
+	return qos;
+}
+
+bool PublisherService::createParticipant()
+{
+	if (participant_ == nullptr)
+	{
+		std::cout << "Participant is creating with transport IP " << config_.ip << " and port " << config_.port << std::endl;
+		DomainParticipantQos qos(getParticipantQos());
+		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, qos);
+		if (participant_ == nullptr)
+		{
+			std::cout << "participant is nullptr" << std::endl;
+			return false;
+		}
+		std::cout << "Participant created" << std::endl;
+	}
+	return true;
+}
+
 void PublisherService::runPublishers()
 {
 	std::vector<std::thread> threads;
@@ -116,6 +151,14 @@ void PublisherService::changeSubsConfigAndInit(const ServiceConfig<PublisherConf
 	}
 }
 
+void PublisherService::setData()
+{
+	for (auto pub : publishers_)
+	{
+		pub->setData();
+	}
+}
+
 void PublisherService::setDdsData(DDSData* data)
 {
 	for (auto pub : publishers_)
@@ -127,7 +170,7 @@ void PublisherService::setDdsData(DDSData* data)
 	}
 }
 
-void PublisherService::setDdsDataEx(DDSDataEx* data, size_t size)
+void PublisherService::setDdsDataEx(DDSDataEx* data)
 {
 	for (auto pub : publishers_)
 	{

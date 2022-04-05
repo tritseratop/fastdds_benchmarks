@@ -4,6 +4,7 @@
 
 #include <fastrtps/Domain.h>
 #include <fastrtps/transport/TCPv4TransportDescriptor.h>
+#include <fastrtps/transport/UDPv4TransportDescriptor.h>
 #include <fastrtps/utils/IPLocator.h>
 
 #include "DdsSubscriber.h"
@@ -14,6 +15,12 @@ using eprosima::fastrtps::types::ReturnCode_t;
 SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server)
 	: participant_(nullptr)
 	, config_(config)
+	, stop_ws_server_(false)
+{
+}
+
+SubscriberService::SubscriberService()
+	: participant_(nullptr)
 	, stop_ws_server_(false)
 {
 }
@@ -35,7 +42,7 @@ SubscriberService::~SubscriberService()
 	std::cout << "Sub service deleted" << std::endl;
 }
 
-void SubscriberService::changeSubsConfig(const ServiceConfig<SubscriberConfig>& config)
+void SubscriberService::changeSubsConfigAndInit(const ServiceConfig<SubscriberConfig>& config)
 {
 	if (config_ == config)
 	{
@@ -72,30 +79,42 @@ DomainParticipantQos SubscriberService::getParticipantQos()
 
 	DomainParticipantQos qos;
 
-	Locator_t initial_peer_locator;
-	initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
-
-	std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
-
-	/*for (std::string ip : config_.whitelist)
+	if (config_.transport = Transport::TCP)
 	{
-		descriptor->interfaceWhiteList.push_back(ip);
-		std::cout << "Whitelisted " << ip << std::endl;
-	}*/
-	IPLocator::setIPv4(initial_peer_locator, config_.ip);
+		Locator_t initial_peer_locator;
+		initial_peer_locator.kind = LOCATOR_KIND_TCPv4;
 
-	initial_peer_locator.port = config_.port;
-	qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
+		std::shared_ptr<TCPv4TransportDescriptor> descriptor = std::make_shared<TCPv4TransportDescriptor>();
 
-	qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
-	qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(1, 0);
-	qos.name(config_.participant_name);
-	
+		/*for (std::string ip : config_.whitelist)
+		{
+			descriptor->interfaceWhiteList.push_back(ip);
+			std::cout << "Whitelisted " << ip << std::endl;
+		}*/
+		IPLocator::setIPv4(initial_peer_locator, config_.ip);
 
-	qos.transport().use_builtin_transports = false;
+		initial_peer_locator.port = config_.port;
+		qos.wire_protocol().builtin.initialPeersList.push_back(initial_peer_locator); // Publisher's meta channel
 
-	qos.transport().user_transports.push_back(descriptor);
+		qos.wire_protocol().builtin.discovery_config.leaseDuration = c_TimeInfinite;
+		qos.wire_protocol().builtin.discovery_config.leaseDuration_announcementperiod = Duration_t(1, 0);
+		qos.name(config_.participant_name);
 
+
+		qos.transport().use_builtin_transports = false;
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
+	else
+	{
+		std::shared_ptr<UDPv4TransportDescriptor> descriptor = std::make_shared<UDPv4TransportDescriptor>();
+
+		descriptor->sendBufferSize = 0;
+		descriptor->receiveBufferSize = 0;
+		descriptor->non_blocking_send = true;
+
+		qos.transport().user_transports.push_back(descriptor);
+	}
 	return qos;
 }
 

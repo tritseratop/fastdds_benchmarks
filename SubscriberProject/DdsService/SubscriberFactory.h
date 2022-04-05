@@ -116,13 +116,13 @@ public:
 		}
 
 		eprosima::fastdds::dds::DataReaderQos rqos;
-		rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
+		/*rqos.history().kind = eprosima::fastdds::dds::KEEP_LAST_HISTORY_QOS;
 		rqos.history().depth = 30;
 		rqos.resource_limits().max_samples = 50;
 		rqos.resource_limits().allocated_samples = 20;
-		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;
-		rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-		rqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
+		rqos.reliability().kind = eprosima::fastdds::dds::RELIABLE_RELIABILITY_QOS;*/
+		//rqos.durability().kind = eprosima::fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+		//rqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
 
 		reader_ = subscriber_->create_datareader(
 			topic_,
@@ -138,7 +138,6 @@ public:
 	TransitionInfo run() override
 	{
 		std::cout << "Loop starts with " << config_.sleep << "ms interval" << std::endl;
-		listener_ = SubscriberListener(this);
 		while (!stop_)
 		{
 			auto kek = eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->lookup_participants(0);
@@ -273,7 +272,7 @@ private:
 			}
 		}
 
-		void on_requested_deadline_missed(
+		/*void on_requested_deadline_missed(
 			eprosima::fastdds::dds::DataReader* reader,
 			const eprosima::fastrtps::RequestedDeadlineMissedStatus& status) override
 		{
@@ -282,13 +281,13 @@ private:
 				this->sub_->stop_ = true;
 				std::cout << "Missed 10 deadlines" << std::endl;
 			}
-		}
+		}*/
 
 		void specificDataHandling(T& data);
 
 	private:
-		int matched_;
-		uint32_t samples_; // TODO atomic??
+		std::atomic<int> matched_;
+		std::atomic<uint32_t> samples_; // TODO atomic??
 		uint32_t losted_count_; // TODO atomic??
 		T data_sample_;
 		ConcreteSubscriber* sub_;

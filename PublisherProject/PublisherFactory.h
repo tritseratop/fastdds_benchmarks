@@ -42,6 +42,7 @@ public:
 	virtual bool init() = 0;
 	virtual void run() = 0;
 	virtual void setData(void* data) = 0;
+	virtual void setData() = 0;
 	virtual TopicType getTopicType() = 0;
 	//virtual void setConfig(const SubscriberConfig& config) = 0;
 protected:
@@ -106,6 +107,8 @@ public:
 		//data_ = *(data_p);
 	}
 
+	void setData() override;
+
 	bool init() override
 	{
 		type_.register_type(participant_);
@@ -125,14 +128,14 @@ public:
 		std::cout << "Publisher is created" << std::endl;
 
 		eprosima::fastdds::dds::DataWriterQos wqos;
-		wqos.history().kind = KEEP_LAST_HISTORY_QOS;
+		/*wqos.history().kind = KEEP_LAST_HISTORY_QOS;
 		wqos.history().depth = 30;
 		wqos.resource_limits().max_samples = 50;
 		wqos.resource_limits().allocated_samples = 20;
 		wqos.reliable_writer_qos().times.heartbeatPeriod.seconds = 2;
 		wqos.reliable_writer_qos().times.heartbeatPeriod.nanosec = 200 * 1000 * 1000;
-		wqos.reliability().kind = RELIABLE_RELIABILITY_QOS;
-		wqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
+		wqos.reliability().kind = RELIABLE_RELIABILITY_QOS;*/
+		//wqos.deadline().period.nanosec = config_.sleep * 1000 * 1000;
 
 		writer_ = publisher_->create_datawriter(topic_, wqos, &listener_);
 		if (writer_ == nullptr)
@@ -146,6 +149,7 @@ public:
 	void run() override
 	{
 		std::cout << "Loop starts with " << config_.sleep << "ms interval" << std::endl;
+
 		while (!stop_ && samples_count_ <= config_.samples)
 		{
 			if (publish(writer_, &listener_))
@@ -154,6 +158,16 @@ public:
 			}
 			std::this_thread::sleep_for(std::chrono::milliseconds(config_.sleep));
 		}
+		//std::this_thread::sleep_for(std::chrono::seconds(20));
+		/*if (writer_ != nullptr)
+		{
+			auto res = publisher_->delete_datawriter(writer_);
+			writer_ = nullptr;
+			if (res != ReturnCode_t::RETCODE_OK)
+			{
+				std::cout << "Error: " << res() << std::endl;
+			}
+		}*/
 		
 	}
 
@@ -227,7 +241,7 @@ private:
 	bool publish(eprosima::fastdds::dds::DataWriter* writer, const DDSDataListener* listener)
 	{
 		//std::lock_guard<std::mutex> guard(std::mutex());
-		if (listener > 0 && listener->first_connected_)
+		if (!stop_ && listener > 0 && listener->first_connected_)
 		{
 			specificDataChanging();
 			data_.time_service(TimeConverter::GetTime_LLmcs());

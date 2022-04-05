@@ -20,14 +20,17 @@ class PublisherService
 public:
 
     PublisherService(const ServiceConfig<PublisherConfig>& config);
+    PublisherService();
     virtual ~PublisherService();
 
     bool initPublishers();
+    eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();
+    bool createParticipant();
     void runPublishers();
     void changeSubsConfigAndInit(const ServiceConfig<PublisherConfig>& config);
-
+    void setData();
     void setDdsData(DDSData* data);
-    void setDdsDataEx(DDSDataEx* data, size_t size);
+    void setDdsDataEx(DDSDataEx* data);
     void setBenchmarkSimple(BenchmarkSimple* data, size_t size);
 
     bool createNewPublisher(const PublisherConfig& config);

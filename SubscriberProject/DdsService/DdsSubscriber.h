@@ -17,9 +17,10 @@
 class SubscriberService {
 public: 
 	SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server);
+	SubscriberService();
 	virtual ~SubscriberService();
 
-	void changeSubsConfig(const ServiceConfig<SubscriberConfig>& config);
+	void changeSubsConfigAndInit(const ServiceConfig<SubscriberConfig>& config);
 
 	bool createParticipant();
 	eprosima::fastdds::dds::DomainParticipantQos getParticipantQos();

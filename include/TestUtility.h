@@ -103,6 +103,42 @@ DDSData getDdsData(size_t size = 4)
     return data1;
 }
 
+DDSDataEx getDdsDataEx(size_t size = 4)
+{
+    DDSDataEx data1;
+    data1.time_service(100);
+    DataExInt data_ex_int;
+    data_ex_int.time_source(101);
+    data_ex_int.value(0);
+    data_ex_int.quality('b');
+    DataExFloat data_ex_float;
+    data_ex_float.time_source(101);
+    data_ex_float.value(0);
+    data_ex_float.quality('b');
+    DataExDouble data_ex_double;
+    data_ex_double.time_source(101);
+    data_ex_double.value(0);
+    data_ex_double.quality('b');
+    DataExChar data_ex_char;
+    data_ex_char.time_source(102);
+    data_ex_char.value(getDefaultVector(1));
+    data_ex_char.quality('b');
+
+    for (int i = 0; i < size; ++i)
+    {
+        data_ex_int.id_tag(i);
+        data_ex_float.id_tag(i);
+        data_ex_double.id_tag(i);
+        data_ex_char.id_tag(i);
+        data1.data_int().push_back(data_ex_int);
+        data1.data_float().push_back(data_ex_float);
+        data1.data_double().push_back(data_ex_double);
+        data1.data_char().push_back(data_ex_char);
+    }
+
+    return data1;
+}
+
 struct DataExUnion
 {
     DDSData data_;
