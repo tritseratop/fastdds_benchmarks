@@ -996,7 +996,7 @@ size_t DataExChar::getMaxCdrSerializedSize(
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataExVectorChar() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -1301,28 +1301,28 @@ size_t DDSDataEx::getMaxCdrSerializedSize(
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < scada_ate::typetopics::GetMaxSizeDDSDataExVectorInt(); ++a)
     {
         current_alignment += DataExInt::getMaxCdrSerializedSize(current_alignment);}
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < scada_ate::typetopics::GetMaxSizeDDSDataExVectorFloat(); ++a)
     {
         current_alignment += DataExFloat::getMaxCdrSerializedSize(current_alignment);}
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < scada_ate::typetopics::GetMaxSizeDDSDataExVectorDouble(); ++a)
     {
         current_alignment += DataExDouble::getMaxCdrSerializedSize(current_alignment);}
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < scada_ate::typetopics::GetMaxSizeDDSDataExVectorChar(); ++a)
     {
         current_alignment += DataExChar::getMaxCdrSerializedSize(current_alignment);}
 

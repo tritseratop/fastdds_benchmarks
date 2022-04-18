@@ -12,6 +12,7 @@
 #include <fastrtps/attributes/ParticipantAttributes.h>
 
 #include "../../TypeTopicsDDS/TypeTopicsPubSubTypes.h"
+#include "../../include/logger/Logger.h"
 #include "SubscriberFactory.h"
 
 class SubscriberService {
@@ -47,7 +48,7 @@ private:
 
 	eprosima::fastdds::dds::DomainParticipant* participant_;
 	eprosima::fastdds::dds::TypeSupport config_type_; // TODO не нужна как поле 
-
+	logger::Logger* log;
 };
 
 #endif //!DDS_SUBSCRIBER_H_

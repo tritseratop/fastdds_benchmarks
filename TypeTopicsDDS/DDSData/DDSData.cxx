@@ -129,13 +129,13 @@ size_t DataCollectionInt::getMaxCdrSerializedSize(
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 4) + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionInt() * 4) + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionInt() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -358,13 +358,13 @@ size_t DataCollectionFloat::getMaxCdrSerializedSize(
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 4) + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionFloat() * 4) + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionFloat() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -587,13 +587,13 @@ size_t DataCollectionDouble::getMaxCdrSerializedSize(
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 8) + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionDouble() * 8) + eprosima::fastcdr::Cdr::alignment(current_alignment, 8);
 
 
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionDouble() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -808,7 +808,7 @@ size_t DataChar::getMaxCdrSerializedSize(
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataChar() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 
@@ -979,13 +979,13 @@ size_t DataCollectionChar::getMaxCdrSerializedSize(
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
 
-    for(size_t a = 0; a < 100; ++a)
+    for(size_t a = 0; a < scada_ate::typetopics::GetMaxSizeDataCollectionChar(); ++a)
     {
         current_alignment += DataChar::getMaxCdrSerializedSize(current_alignment);}
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
 
-    current_alignment += (100 * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += (scada_ate::typetopics::GetMaxSizeDataCollectionChar() * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
 

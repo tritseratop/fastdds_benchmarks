@@ -16,6 +16,7 @@
 #include "../../BenchmarkTopics/BenchmarkVectorPubSubTypes.h"
 #include "../../include/TimeConverter/TimeConverter.hpp"
 #include "../../include/CommonClasses.h"
+#include "../../include/logger/Logger.h"
 
 struct SubscriberConfig
 {
@@ -60,6 +61,7 @@ public:
 		, stop_(false)
 	{
 		setDataSize();
+		log = logger::Logger::getInstance("Subscriber", "logs.txt", true);
 	}
 	~ConcreteSubscriber() override
 	{
@@ -68,7 +70,7 @@ public:
 			auto res = subscriber_->delete_datareader(reader_);
 			if (res != ReturnCode_t::RETCODE_OK)
 			{
-				std::cout << "Error: " << res() << std::endl;
+				*log << logger::Logger::e_logType::LOG_ERROR << "Error: " + std::to_string(res());
 			}
 		}
 		subscriber_->delete_contained_entities();
@@ -77,7 +79,7 @@ public:
 			auto res = participant_->delete_subscriber(subscriber_);
 			if (res != ReturnCode_t::RETCODE_OK)
 			{
-				std::cout << "Error: " << res() << std::endl;
+				*log << logger::Logger::e_logType::LOG_ERROR << "Error: " + std::to_string(res());
 			}
 		}
 		if (topic_ != nullptr)
@@ -85,17 +87,16 @@ public:
 			auto res = participant_->delete_topic(topic_);
 			if (res != ReturnCode_t::RETCODE_OK)
 			{
-				std::cout << "Error: " << res() << std::endl;
+				*log << logger::Logger::e_logType::LOG_ERROR << "Error: " + std::to_string(res());
 			}
 		}
-		
-		std::cout << "Subscriber is deleted" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Subscriber is deleted";
 		//support_type_.delete_data(support_type_.get());
 	}
 
 	bool init() override
 	{
-		std::cout << "Subscriber is creating" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Subscriber is creating";
 		if (participant_ == nullptr)
 		{
 			return false;
@@ -132,12 +133,12 @@ public:
 		{
 			return false;
 		}
-		std::cout << "Subscriber created" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Subscriber created";
 		return true;
 	}
 	TransitionInfo run() override
 	{
-		std::cout << "Loop starts with " << config_.sleep << "ms interval" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Loop starts with " + std::to_string(config_.sleep) + "ms interval";
 		while (!stop_)
 		{
 			auto kek = eprosima::fastdds::dds::DomainParticipantFactory::get_instance()->lookup_participants(0);
@@ -149,10 +150,10 @@ public:
 			reader_ = nullptr;
 			if (res != ReturnCode_t::RETCODE_OK)
 			{
-				std::cout << "Error: " << res() << std::endl;
+				*log << logger::Logger::e_logType::LOG_ERROR << "Error: " + std::to_string(res());
 			}
 		}
-		std::cout << "Loop stopped" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Loop stopped";
 		stop_ = false;
 
 		TransitionInfo info;
@@ -172,13 +173,13 @@ public:
 				info.delivery_time += p.first.delivery_time;
 				info.size += p.first.size;
 			}
-			std::cout << "Total delivery time: " << info.delivery_time << std::endl;
-			std::cout << "Average delivery time: " << info.delivery_time / data_.size() << std::endl;
-			std::cout << "Max delivery time: " << info.max_delivery_time << std::endl;
-			std::cout << "Min delivery time: " << info.min_delivery_time << std::endl;
+			*log << logger::Logger::e_logType::LOG_INFO << "Total delivery time:\t" + std::to_string(info.delivery_time);
+			*log << logger::Logger::e_logType::LOG_INFO << "Average delivery time:\t" + std::to_string(info.delivery_time / data_.size());
+			*log << logger::Logger::e_logType::LOG_INFO << "Max delivery time:\t\t" + std::to_string(info.max_delivery_time);
+			*log << logger::Logger::e_logType::LOG_INFO << "Min delivery time:\t\t" + std::to_string(info.min_delivery_time);
 		}
-		std::cout << "Number of losted packages: " << config_.samples - data_.size() << std::endl;
-		std::cout << "Total transmitted size: " << info.size << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Losted packages:\t\t" + std::to_string(config_.samples - data_.size());
+		*log << logger::Logger::e_logType::LOG_INFO << "Total transmitted size:\t" + std::to_string(info.size);
 		return info;
 	}
 
@@ -207,6 +208,8 @@ private:
 	eprosima::fastdds::dds::TypeSupport support_type_; // TODO не нужна как поле ?
 	SubscriberConfig config_;
 
+	logger::Logger* log;
+
 	void setDataSize() {};
 
 	void runDataSending();
@@ -221,6 +224,7 @@ private:
 			, sub_(subscriber)
 			, losted_count_(0)
 		{
+			log = logger::Logger::getInstance("Subscriber", "logs.txt", true);
 		}
 		~SubscriberListener() override
 		{
@@ -253,12 +257,12 @@ private:
 			if (info.current_count_change == 1)
 			{
 				matched_ += info.current_count_change;
-				std::cout << "Subscriber #" << sub_->subscriber_->get_instance_handle() << " matched." << std::endl;
+				*log << logger::Logger::e_logType::LOG_INFO << "Subscriber matched";
 			}
 			else if (info.current_count_change == -1)
 			{
 				matched_ += info.current_count_change;
-				std::cout << "Subscriber #" << sub_->subscriber_->get_instance_handle() << " unmatched." << std::endl;
+				*log << logger::Logger::e_logType::LOG_INFO << "Subscriber unmatched";
 
 				if (info.current_count == 0)
 				{
@@ -267,8 +271,8 @@ private:
 			}
 			else
 			{
-				std::cout << "ConcreteSubscriber: " << info.current_count_change
-					<< " is not a valid value for SubscriptionMatchedStatus current count change" << std::endl;
+				*log << logger::Logger::e_logType::LOG_INFO << "ConcreteSubscriber: " + std::to_string(info.current_count_change)
+					+ " is not a valid value for SubscriptionMatchedStatus current count change";
 			}
 		}
 
@@ -291,6 +295,7 @@ private:
 		uint32_t losted_count_; // TODO atomic??
 		T data_sample_;
 		ConcreteSubscriber* sub_;
+		logger::Logger* log;
 	} listener_;
 };
 

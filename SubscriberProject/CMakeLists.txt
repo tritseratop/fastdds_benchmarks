@@ -32,6 +32,7 @@ file(GLOB SUBSCRIBER_PROJECT_CPP
         "DdsService/*.h"
         "../include/*.cpp"
         "../include/TimeConverter/*.cpp"
+        "../include/logger/*.cpp"
         "ThreadSafeQueue/*.h" 
         "../ConfigTopic/*.cxx" 
         "../TypeTopicsDDS/DDSAlarm/*.cxx" 

@@ -14,39 +14,40 @@ using eprosima::fastrtps::types::ReturnCode_t;
 
 SubscriberService::SubscriberService(const ServiceConfig<SubscriberConfig>& config, IServer* server)
 	: participant_(nullptr)
-	, config_(config)
 	, stop_ws_server_(false)
+	, config_(config)
 {
+	log = logger::Logger::getInstance("Subscriber", "logs.txt", true);
 }
 
 SubscriberService::SubscriberService()
 	: participant_(nullptr)
 	, stop_ws_server_(false)
 {
+	log = logger::Logger::getInstance("Subscriber", "logs.txt", true);
 }
 
 SubscriberService::~SubscriberService()
 {
 	deleteSubscribers();
-	std::cout << "All subscriber deleted" << std::endl;
+	*log << logger::Logger::e_logType::LOG_INFO << "All subscriber deleted";
 	if (participant_->delete_contained_entities() != ReturnCode_t::RETCODE_OK)
 	{
-		std::cout << "Participant entities deletion failed" << std::endl;
+		*log << logger::Logger::e_logType::LOG_ERROR << "Participant's entities deletion failed";
 	}
 	std::cout << "Participant entities deleted" << std::endl;
 	if (DomainParticipantFactory::get_instance()->delete_participant(participant_) != ReturnCode_t::RETCODE_OK)
 	{
-		std::cout << "Participant deletion failed" << std::endl;
+		*log << logger::Logger::e_logType::LOG_ERROR << "Participant deletion failed";
 	}
-	
-	std::cout << "Sub service deleted" << std::endl;
+	*log << logger::Logger::e_logType::LOG_INFO << "Sub service deleted";
 }
 
 void SubscriberService::changeSubsConfigAndInit(const ServiceConfig<SubscriberConfig>& config)
 {
 	if (config_ == config)
 	{
-		std::cout << "This subscriber's configuration has been already runConfigPub" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "This subscriber's configuration has been already runConfigPub";
 	}
 	else
 	{
@@ -60,13 +61,14 @@ bool SubscriberService::createParticipant()
 {
 	if (participant_ == nullptr)
 	{
-		std::cout << "Participant is creating with transport IP " << config_.ip << " and port " << config_.port << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO
+			<< "Participant is creating with transport IP " + config_.ip + " and port " + std::to_string(config_.port);
 		participant_ = DomainParticipantFactory::get_instance()->create_participant(0, getParticipantQos());
 		if (participant_ == nullptr)
 		{
 			return false;
 		}
-		std::cout << "Participant created" << std::endl;
+		*log << logger::Logger::e_logType::LOG_INFO << "Participant created";
 	}
 	return true;
 }
@@ -131,7 +133,7 @@ bool SubscriberService::initSubscribers()
 	}
 	else
 	{
-		std::cout << "Configuration for subscribers is not found" << std::endl;
+		*log << logger::Logger::e_logType::LOG_WARNING << "Configuration for subscribers is not found";
 		return false;
 	}
 	for (auto& sub : subscribers_)
@@ -186,11 +188,13 @@ void SubscriberService::deleteSubscribers()
 // TODO: сделать макрос?
 void SubscriberService::setVectorSizesInDataTopic()
 {
+	scada_ate::typetopics::SetMaxSizeDataChar(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionInt(config_.MaxSizeDataCollectionInt);
 	scada_ate::typetopics::SetMaxSizeDataCollectionFloat(config_.MaxSizeDataCollectionFloat);
 	scada_ate::typetopics::SetMaxSizeDataCollectionDouble(config_.MaxSizeDataCollectionDouble);
 	scada_ate::typetopics::SetMaxSizeDataCollectionChar(config_.MaxSizeDataCollectionChar);
 
+	scada_ate::typetopics::SetMaxSizeDataExVectorChar(config_.MaxSizeDDSDataExVectorInt);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorInt(config_.MaxSizeDDSDataExVectorInt);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorFloat(config_.MaxSizeDDSDataExVectorFloat);
 	scada_ate::typetopics::SetMaxSizeDDSDataExVectorDouble(config_.MaxSizeDDSDataExVectorDouble);

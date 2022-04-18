@@ -16,285 +16,73 @@ int main(
     int argc,
     char** argv)
 {
+    std::vector<uint16_t> sizes = {10, 100, 1000, 10000};
+    std::vector<uint32_t> v_sleep = {100};
     uint32_t samples = 50;
-    std::vector< ServiceConfig<PublisherConfig> > configs =
-    {
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 100},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 500},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 500},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 100},
-            },
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10,
-            10
-        }
-    };
-
+    std::string ip = "127.0.0.1";
+    Transport transport = Transport::TCP;
     if (argc > 1)
     {
-        std::string ip = std::string(argv[1]);        
-        for (auto conf : configs)
+        ip = std::string(argv[1]);
+        if (argc > 2)
         {
-            conf.ip = ip;
+            transport = Transport::UDP;
+        }
+    }
+    ServiceConfig<PublisherConfig> default_service_config = {
+        "Participant_pub",
+        transport,
+        ip,
+        1111,
+        {"127.0.0.1"},
+        {},
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000
+    };
+    PublisherConfig ddsdata_config = {
+        0, 10, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 1000
+    };
+    PublisherConfig ddsdataex_config = {
+        0, 10, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 1000
+    };
+    std::vector<ServiceConfig<PublisherConfig>> configs;
+    for (auto size : sizes)
+    {
+        ddsdata_config.vector_size = size;
+        ddsdataex_config.vector_size = size;
+        for (auto sleep : v_sleep)
+        {
+            ddsdata_config.sleep = sleep;
+            default_service_config.configs = { ddsdata_config };
+            configs.push_back(default_service_config);
+
+            ddsdataex_config.sleep = sleep;
+            default_service_config.configs = { ddsdataex_config };
+            configs.push_back(default_service_config);
+
         }
     }
 
     PublisherService* mypub = new PublisherService();
+    int i = 1;
     for (auto conf : configs)
     {
-        std::cout << "\nSERVICE RUN WITH TOPIC " << conf.configs[0].topic_name << std::endl;
+        std::cout << "\n" << i++ << ". SERVICE RUN WITH TOPIC " << conf.configs[0].topic_name 
+            << " size: " << conf.configs[0].vector_size << std::endl;
         mypub->changeSubsConfigAndInit(conf);
         mypub->setData();
         mypub->runPublishers();
     }
 
     delete mypub;
-
-    std::vector< ServiceConfig<PublisherConfig> > configs1 =
-    {
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 100},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 500},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 500},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSData", "DDSData", TopicType::DDS_DATA, samples, 100},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        },
-        {
-            "Participant_pub",
-            Transport::TCP,
-            "127.0.0.1",
-            1111,
-            {"127.0.0.1"},
-            {
-                {0, 100, "DDSDataEx", "DDSDataEx", TopicType::DDS_DATA_EX, samples, 100},
-            },
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000,
-            10000
-        }
-    };
-
-    /*PublisherService* mypub1 = new PublisherService();
-    for (auto conf : configs1)
-    {
-        std::cout << "\nSERVICE RUN WITH TOPIC " << conf.configs[0].topic_name << std::endl;
-        mypub1->changeSubsConfigAndInit(conf);
-        mypub1->setData();
-        mypub1->runPublishers();
-    }
-
-    delete mypub1;*/
 
     system("pause");
 }
